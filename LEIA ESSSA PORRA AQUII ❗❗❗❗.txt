@@ -1,0 +1,87 @@
+
+================================================================
+====================== SHIZUKU BASE ============================
+================================================================
+
+ESTA E UMA BASE LIMPA E SIMPLES, DESENVOLVIDA TOTALMENTE DO ZERO
+POR MIM JPZINH. NAO E UM BOT COMPLETO, E UMA ESTRUTURA PARA
+AJUDAR QUEM ESTA COMEANDO E NAO SABE O BASICO.
+
+NAO VENDA, NAO REPASSE E NAO DIGA QUE FOI VOCE QUE FEZ.
+USE COM RESPONSABILIDADE. ESTA BASE FOI CRIADA COM MUITO ESFORCO.
+
+----------------------------------------------------------------
+==================== INFORMACOES DO PROJETO =====================
+----------------------------------------------------------------
+
+NOME: SHIZUKU BASE
+CREATOR: JPZINH
+
+WHATSAPP (MEU E DO MEU BOT):
+- 55 16 98828-0081
+- 55 93 9242-0001
+- 55 93 9229-1244
+
+----------------------------------------------------------------
+======================== SOBRE AS KEYS ==========================
+----------------------------------------------------------------
+
+ALGUNS COMANDOS COMO DOWNLOADS EXIGEM KEY PARA FUNCIONAR.
+
+ADQUIRA SUA KEY NO SITE OFICIAL:
+HTTPS://SHIZUKU-APIS.SHOP
+
+DONOS: JPZINH E DEV-FOXY
+LOJA (TELEGRAM): HTTPS://T.ME/SHIZUKUAPIS_BOT
+
+----------------------------------------------------------------
+====================== CHAT IA (SUPORTE) ========================
+----------------------------------------------------------------
+
+ACESSE:
+HTTPS://SHIZUKU-IA.0.OBRH.UNO/
+
+----------------------------------------------------------------
+==================== CANAL DE ATUALIZACOES ======================
+----------------------------------------------------------------
+
+ACESSE:
+HTTPS://WHATSAPP.COM/CHANNEL/0029VBBOQI7F1YLYIXIWBD37
+
+----------------------------------------------------------------
+======================== GRUPO DE SUPORTE =======================
+----------------------------------------------------------------
+
+ENTRE NO GRUPO:
+HTTPS://CHAT.WHATSAPP.COM/D1WUKVCRWR FCU05MGGPWTY
+
+----------------------------------------------------------------
+=========================== AVISO FINAL =========================
+----------------------------------------------------------------
+
+DEIXE OS CREDITOS.
+NAO REMOVA OS CREDITOS.
+RESPEITE O TRABALHO FEITO AQUI.
+
+================================================================
+========================== END OF FILE ==========================
+================================================================
+
+
+
+SOBRE A INSTALAÇÃO DA BOT
+
+VOCÊ PODE SE VIRAR E INSTALAR TUDO MANUALMENTE UM POR 1 DO SEU JEITO 
+OBS: PEGANDO DP INSTALAR.SH
+
+antes de tudo, caso vc teja abrindo agora o termux usa: termux-setup-storage
+para dar permissão ao termux de acessar a memória do seu dispositivo 
+
+OU VAI NO CONSOLE E USA sh instalar.sh
+se travar dar enter ou se parar com algo assim: [y/n] clica em "y" e dar enter que vai continuar a instalação normalmente!
+
+para instalar só os módulos usa: npm install --no-bin-links // se for no termux 
+
+ou npm i  // se for em host!! 
+
+ah, no termux a instalação vai depender muito da sua internet tbm, se ela for boa, ela instala rápido, agora se for igual a minha, desista kkkk
