@@ -83,7 +83,7 @@ const { banner2, banner3 } = require("./consts");
 const { prefix } = require("./dono/dono");
 
 async function Bot() {
-    const pastaAuth = "./database/qr-code";
+    const pastaAuth = "./auth";
 
     const { state, saveCreds } = await useMultiFileAuthState(pastaAuth);
     const { version } = await fetchLatestBaileysVersion();
