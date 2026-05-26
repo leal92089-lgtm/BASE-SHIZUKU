@@ -75,81 +75,85 @@ const {
     Browsers,
     DisconnectReason
 } = require("@whiskeysockets/baileys");
+
 const colors = require("colors");
 const P = require("pino");
-const { banner2, banner3, data, hora } = require("./consts");
-const { prefix } = require("./dono/dono");
 
-const rl = require("readline").createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+const { banner2, banner3 } = require("./consts");
+const { prefix } = require("./dono/dono");
 
 async function Bot() {
     const pastaAuth = "./database/qr-code";
+
     const { state, saveCreds } = await useMultiFileAuthState(pastaAuth);
     const { version } = await fetchLatestBaileysVersion();
 
-    const phoneNumber = process.env.PHONE_NUMBER || ""; // Pegar do Railway
+    const phoneNumber = (process.env.PHONE_NUMBER || "").trim();
 
     const conn = makeWASocket({
         version,
         auth: state,
-        logger: P({ level: "silent" }),
+        logger: P({ level: "info" }),
         printQRInTerminal: false,
         browser: Browsers.macOS("Safari"),
-        pairingCode: true,           // Ativado
-        phoneNumber: phoneNumber,    // Número vindo da variável
         markOnlineOnConnect: true,
     });
 
-    if (conn.authState?.creds?.registered) {
-        console.log(colors.green("\n[✓] Sessão ativa detectada! Conectando...\n"));
-    } else {
-        console.log(colors.cyan("\nNenhuma sessão encontrada. Vamos conectar seu número.\n"));
-        
+    // ================== CONEXÃO / LOGIN ==================
+    if (!state.creds.registered) {
+        console.log(colors.yellow("\n[!] Nenhuma sessão encontrada. Iniciando conexão...\n"));
+
         if (!phoneNumber) {
-            console.log(colors.red("❌ Erro: Defina a variável PHONE_NUMBER no Railway com seu número!"));
-            console.log(colors.yellow("Exemplo: 5511999999999"));
+            console.log(colors.red("❌ Defina PHONE_NUMBER no ambiente (ex: 244954414977)"));
             process.exit(1);
         }
 
-        console.log(colors.gray("\nGerando código de pareamento...\n"));
         try {
+            console.log(colors.gray("Gerando código de pareamento...\n"));
+
             const code = await conn.requestPairingCode(phoneNumber);
-            console.log(colors.cyan(`📲 Seu código de pareamento:\n\n ${colors.white.bold(code)}\n`));
-            console.log(colors.yellow("Digite esse código no WhatsApp → Dispositivos Vinculados"));
+
+            console.log(
+                colors.cyan("\n📲 CÓDIGO DE PAREAMENTO:\n") +
+                colors.white.bold(code) +
+                "\n"
+            );
+
+            console.log(colors.yellow("Vá ao WhatsApp → Dispositivos conectados → Inserir código"));
         } catch (err) {
-            console.log(colors.red("\n❌ Erro ao gerar código de pareamento:\n"), err);
+            console.log(colors.red("❌ Erro ao gerar código de pareamento:"), err);
         }
+    } else {
+        console.log(colors.green("\n[✓] Sessão encontrada. Conectando...\n"));
     }
 
-    // =================== EVENTOS ===================
-    conn.ev.process(async (events) => {
-        if (events["messages.upsert"]) {
-            const upsert = events["messages.upsert"];
-            require("./index.js")(conn, upsert);
-        }
+    // ================== EVENTOS ==================
+    conn.ev.on("creds.update", saveCreds);
 
-        if (events["creds.update"]) {
-            await saveCreds();
-        }
+    conn.ev.on("messages.upsert", async (m) => {
+        require("./index.js")(conn, m);
     });
 
-    conn.ev.on("connection.update", ({ connection, lastDisconnect }) => {
-        const shouldReconnect = lastDisconnect?.error?.output?.statusCode;
+    conn.ev.on("connection.update", (update) => {
+        const { connection, lastDisconnect } = update;
 
-        switch (connection) {
-            case 'close':
-                if (shouldReconnect !== DisconnectReason.loggedOut) {
-                    setTimeout(() => Bot(), 2000);
-                }
-                break;
-            case 'open':
-                console.log(banner3?.string || "");
-                console.log(banner2?.string || "");
-                console.log(colors.green(`〔 CONECTADA COM SUCESSO... 〕`));
-                break;
+        if (connection === "close") {
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+
+            const shouldReconnect =
+                statusCode !== DisconnectReason.loggedOut;
+
+            console.log(colors.red("Conexão fechada. Reconectando..."));
+
+            if (shouldReconnect) {
+                setTimeout(() => Bot(), 3000);
+            }
+        }
+
+        if (connection === "open") {
+            console.log(banner3?.string || "");
+            console.log(banner2?.string || "");
+            console.log(colors.green("〔 BOT CONECTADO COM SUCESSO 〕"));
         }
     });
 
@@ -157,4 +161,8 @@ async function Bot() {
 }
 
 module.exports = Bot;
-Bot().catch(e => console.log(colors.red("• ERROR: " + e)));
+
+// START
+Bot().catch((e) => {
+    console.log(colors.red("❌ ERRO GERAL: " + e));
+});
