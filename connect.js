@@ -115,11 +115,18 @@ async function Bot() {
 
            setTimeout(async () => {
     try {
-        const code = await conn.requestPairingCode(phoneNumber);
+        const pairingCode = await conn.requestPairingCode(phoneNumber);
+
+        if (!pairingCode) {
+            console.log("❌ Não foi possível gerar o código");
+            return;
+        }
+
         console.log("📲 CÓDIGO DE PAREAMENTO:");
-        console.log(code);
+        console.log(pairingCode);
+
     } catch (err) {
-        console.log("❌ Erro ao gerar código:", err);
+        console.log("❌ Erro ao gerar código de pareamento:", err);
     }
 }, 10000);
 
