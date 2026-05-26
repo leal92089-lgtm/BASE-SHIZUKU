@@ -111,7 +111,7 @@ async function Bot() {
         try {
             console.log(colors.gray("Gerando código de pareamento...\n"));
 
-            const code = await conn.requestPairingCode(phoneNumber);
+            await new Promise(r => setTimeout(r, 8000));
 
             console.log(
                 colors.cyan("\n📲 CÓDIGO DE PAREAMENTO:\n") +
