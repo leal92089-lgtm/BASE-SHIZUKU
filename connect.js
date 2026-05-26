@@ -113,11 +113,15 @@ async function Bot() {
 
             await new Promise(r => setTimeout(r, 8000));
 
-            console.log(
-                colors.cyan("\n📲 CÓDIGO DE PAREAMENTO:\n") +
-                colors.white.bold(code) +
-                "\n"
-            );
+           setTimeout(async () => {
+    try {
+        const code = await conn.requestPairingCode(phoneNumber);
+        console.log("📲 CÓDIGO DE PAREAMENTO:");
+        console.log(code);
+    } catch (err) {
+        console.log("❌ Erro ao gerar código:", err);
+    }
+}, 10000);
 
             console.log(colors.yellow("Vá ao WhatsApp → Dispositivos conectados → Inserir código"));
         } catch (err) {
