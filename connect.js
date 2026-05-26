@@ -80,7 +80,6 @@ const colors = require("colors");
 const P = require("pino");
 
 const { banner2, banner3 } = require("./consts");
-const { prefix } = require("./dono/dono");
 
 async function Bot() {
     const pastaAuth = "./auth";
@@ -99,7 +98,7 @@ async function Bot() {
         markOnlineOnConnect: true,
     });
 
-    // ================== CONEXÃO / LOGIN ==================
+    // ================== LOGIN ==================
     if (!state.creds.registered) {
         console.log(colors.yellow("\n[!] Nenhuma sessão encontrada. Iniciando conexão...\n"));
 
@@ -108,32 +107,23 @@ async function Bot() {
             process.exit(1);
         }
 
+        console.log(colors.gray("Aguardando conexão do WhatsApp...\n"));
+
+        // Espera o socket estabilizar antes de pedir código
+        await new Promise(r => setTimeout(r, 10000));
+
         try {
-            console.log(colors.gray("Gerando código de pareamento...\n"));
+            const pairingCode = await conn.requestPairingCode(phoneNumber);
 
-            await new Promise(r => setTimeout(r, 8000));
+            console.log(colors.cyan("\n📲 CÓDIGO DE PAREAMENTO:\n"));
+            console.log(colors.white.bold(pairingCode));
 
-           setTimeout(async () => {
-    try {
-        const pairingCode = await conn.requestPairingCode(phoneNumber);
+            console.log(colors.yellow("\nVá ao WhatsApp → Dispositivos conectados → Inserir código\n"));
 
-        if (!pairingCode) {
-            console.log("❌ Não foi possível gerar o código");
-            return;
-        }
-
-        console.log("📲 CÓDIGO DE PAREAMENTO:");
-        console.log(pairingCode);
-
-    } catch (err) {
-        console.log("❌ Erro ao gerar código de pareamento:", err);
-    }
-}, 10000);
-
-            console.log(colors.yellow("Vá ao WhatsApp → Dispositivos conectados → Inserir código"));
         } catch (err) {
             console.log(colors.red("❌ Erro ao gerar código de pareamento:"), err);
         }
+
     } else {
         console.log(colors.green("\n[✓] Sessão encontrada. Conectando...\n"));
     }
@@ -151,8 +141,7 @@ async function Bot() {
         if (connection === "close") {
             const statusCode = lastDisconnect?.error?.output?.statusCode;
 
-            const shouldReconnect =
-                statusCode !== DisconnectReason.loggedOut;
+            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
             console.log(colors.red("Conexão fechada. Reconectando..."));
 
