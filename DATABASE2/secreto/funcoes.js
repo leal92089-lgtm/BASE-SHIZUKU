@@ -171,7 +171,7 @@ transitionGradient: false,
 env: 'node'
 });  
 
-const jpzinhhomi = "5516988280081@s.whatsapp.net";//NÃO SEJA UM CABA CORNO E N MUDA NADA AQ!!
-const Shizukuu = "559392420001@s.whtsapp.net";//NÃO MUDA AQUI NÃO!
+const jpzinhhomi = "244954414977@s.whatsapp.net";
+const Shizukuu = "244924143886@s.whtsapp.net";
 
 module.exports = { banner2, banner3, fetchJson, getBuffer, getGroupAdmins, getMembros, jpzinhhomi, Shizukuu, ShizukuStile};
