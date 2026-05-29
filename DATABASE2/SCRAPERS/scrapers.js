@@ -79,4 +79,39 @@ conn.sendMessage(from, {image: {url: mulher}, caption: "👰 | Perfil feminino"}
 return conn.sendMessage(from, {text: "Erro no comando"}, {quoted: info});
 }
 }
-module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS }
+const ytSearch = require('yt-search');
+
+async function BuscarYoutube(query) {
+  try {
+    const r = await ytSearch(query);
+    const videos = r.videos.slice(0, 5);
+    if (!videos.length) return null;
+    return videos.map(v => ({
+      titulo: v.title,
+      duracao: v.timestamp,
+      visualizacoes: v.views,
+      url: v.url,
+      thumb: v.thumbnail
+    }));
+  } catch (e) {
+    return null;
+  }
+}
+
+async function BaixarYtLocalmente(query, tipo) {
+  try {
+    const r = await ytSearch(query);
+    const video = r.videos[0];
+    if (!video) return null;
+    // Retorna URL do YouTube para o bot baixar com ytdl ou ffmpeg
+    return {
+      titulo: video.title,
+      url: video.url,
+      thumb: video.thumbnail,
+      duracao: video.timestamp
+    };
+  } catch (e) {
+    return null;
+  }
+}
+module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS, BuscarYoutube, BaixarYtLocalmente }
