@@ -1,11 +1,27 @@
+```js
 const fetch = require('node-fetch');
-
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const ytdlp = require('yt-dlp-exec');
 
-const genAI = new GoogleGenerativeAI("TUA_API_GEMINI");
+
+// =====================================
+// CONFIG
+// =====================================
+
+const GEMINI_API = process.env.GEMINI_API;
+
+const genAI = new GoogleGenerativeAI(GEMINI_API);
+
+
+// =====================================
+// GPT
+// =====================================
 
 async function BuscarNogpt(query) {
+
 try {
+
+if (!query) return "Faça uma pergunta.";
 
 const model = genAI.getGenerativeModel({
 model: "gemini-1.5-flash"
@@ -13,109 +29,26 @@ model: "gemini-1.5-flash"
 
 const result = await model.generateContent(query);
 
-return result.response.text();
+const resposta = result.response.text();
+
+return resposta;
 
 } catch (e) {
-return "Erro: " + e;
-}
-}
 
-async function BaixarNoYt(query, tipo) {
-try {const res = await fetch(`https://shizuku-ia.0.obrh.uno/api/download/youtube?query=${encodeURIComponent(query.trim())}&tipo=${tipo}`)
-const api = await res.json()
-const result = api?.resultado?.download;
-return result;
-} catch (e) {
-return "Erro ao buscar resultados";
-}
-};
+console.log(e);
 
-async function ttkdl(url) {
+return "Erro ao usar GPT.";
 
-const res = await fetch(
-`https://tikwm.com/api/?url=${encodeURIComponent(url)}`
-);
-
-const json = await res.json();
-
-return json.data.play;
-}
-if(!api?.resultado) return conn.sendMessage(from, {text: "Erro ao buscar por resultados"}, {quoted: info})
-const i = api?.resultado?.data[0];
-const txt = `*Titulo:* ${i?.title}
-*Sub Titulo:* ${i?.title_audio}
-
-*DOWNLOAD VIA SHIZUKU API'S*`;
-setTimeout(() => {
-return conn.sendMessage(from, {image: {url: i?.thumb}, caption: txt}, {quoted: info})
-}, 2000);
-setTimeout(() => {
-return conn.sendMessage(from, {video: {url: i?.videoMp4}, mimetype: "video/mp4"}, {quoted: info});
-}, 2000);
-setTimeout(() => {
-return conn.sendMessage(from, {audio: {url: i?.audioMp3}, mimetype: "audio/mpeg", ptt: false, contextInfo: ShizukuStile}, {quoted: info})
-}, 2000);
-} catch (e) {
-return conn.sendMessage(from, {text: "Erro ao buscar por resultados!"});
-}
-};
-
-async function instadl(url, conn, from, info, quoted, ShizukuStile, SHIZUKU_SITE, SHIZUKU_KEY) {
-if(!url?.includes("instagram")) return conn.sendMessage(from, {text: "Apenas links do Instagram"}, {quoted: info})
-try {const res = await fetch(`${SHIZUKU_SITE}/download/igdl?url=${encodeURIComponent(url?.trim())}&apitoken=${SHIZUKU_KEY}`);
-const api = await res.json();
-if(!api?.resultado) return conn.sendMessage(from, {text: "Erro ao obter informações do vídeo"}, {quoted: info});
-const i = api?.resultado[0];
-setTimeout(() => {
-return conn.sendMessage(from, {image: {url: i?.thumb}, caption: "*_baixando e enviando o vídeo, aguarde.._*"}, {quoted: info});
-}, 2000);
-setTimeout(() => {
-return conn.sendMessage(from, {video: {url: i?.url}, mimetype: "video/mp4"}, {quoted: info});
-}, 2000);
-} catch (e) {
-conn.sendMessage(from, {text: "Erro ao buscar resultados"});
-return;
-}
 }
 
-async function METADINHAS(conn, from, info,quoted, SHIZUKU_KEY, SHIZUKU_SITE) {
-try {const res = await fetch(`${SHIZUKU_SITE}/api/metadinha?&apitoken=${SHIZUKU_KEY}`);
-const json = await res.json();
-const api = json?.resultado;
-const homem = api?.masculino;
-const mulher = api?.feminino;
-setTimeout(() => {
-conn.sendMessage(from, {image: {url: homem},caption: "🤵 | Perfil masculino"}, {quoted: info});
-}, 2000);
-setTimeout (() => {
-conn.sendMessage(from, {image: {url: mulher}, caption: "👰 | Perfil feminino"}, {quoted: info})
-}, 2000);
-} catch (e) {
-return conn.sendMessage(from, {text: "Erro no comando"}, {quoted: info});
-}
-}
-const ytSearch = require('yt-search');
-
-async function BuscarYoutube(query) {
-  try {
-    const r = await ytSearch(query);
-    const videos = r.videos.slice(0, 5);
-    if (!videos.length) return null;
-    return videos.map(v => ({
-      titulo: v.title,
-      duracao: v.timestamp,
-      visualizacoes: v.views,
-      url: v.url,
-      thumb: v.thumbnail
-    }));
-  } catch (e) {
-    return null;
-  }
 }
 
-const ytdlp = require('yt-dlp-exec');
 
-async function BaixarNoYt(url) {
+// =====================================
+// YOUTUBE
+// =====================================
+
+async function BaixarNoYt(url, tipo = "audio") {
 
 try {
 
@@ -123,13 +56,281 @@ const info = await ytdlp(url, {
 dumpSingleJson: true
 });
 
+if (tipo === "video") {
+
 return {
 titulo: info.title,
-audio: info.url
+download: info.url
 };
 
-} catch(e) {
-return "Erro ao baixar";
 }
+
+if (tipo === "audio") {
+
+return {
+titulo: info.title,
+download: info.url
+};
+
 }
-module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS, BuscarYoutube, BaixarYtLocalmente }
+
+return {
+titulo: info.title,
+download: info.url
+};
+
+} catch (e) {
+
+console.log(e);
+
+return "Erro ao baixar conteúdo.";
+
+}
+
+}
+
+
+// =====================================
+// TIKTOK
+// =====================================
+
+async function ttkdl(
+url,
+conn,
+from,
+info,
+quoted,
+ShizukuStile
+) {
+
+try {
+
+if (!url.includes("tiktok")) {
+
+return conn.sendMessage(
+from,
+{text: "Apenas links do TikTok"},
+{quoted: info}
+);
+
+}
+
+const res = await fetch(
+`https://tikwm.com/api/?url=${encodeURIComponent(url)}`
+);
+
+const json = await res.json();
+
+if (!json.data) {
+
+return conn.sendMessage(
+from,
+{text: "Erro ao obter vídeo."},
+{quoted: info}
+);
+
+}
+
+const data = json.data;
+
+const txt = `
+🎵 *TikTok Download*
+
+📌 *Título:* ${data.title}
+
+👤 *Autor:* ${data.author.nickname}
+`;
+
+await conn.sendMessage(
+from,
+{
+image: {url: data.cover},
+caption: txt
+},
+{quoted: info}
+);
+
+await conn.sendMessage(
+from,
+{
+video: {url: data.play},
+mimetype: "video/mp4"
+},
+{quoted: info}
+);
+
+await conn.sendMessage(
+from,
+{
+audio: {url: data.music},
+mimetype: "audio/mpeg",
+ptt: false,
+contextInfo: ShizukuStile
+},
+{quoted: info}
+);
+
+} catch (e) {
+
+console.log(e);
+
+return conn.sendMessage(
+from,
+{text: "Erro ao baixar TikTok."},
+{quoted: info}
+);
+
+}
+
+}
+
+
+// =====================================
+// INSTAGRAM
+// =====================================
+
+async function instadl(
+url,
+conn,
+from,
+info,
+quoted,
+ShizukuStile
+) {
+
+try {
+
+if (!url.includes("instagram")) {
+
+return conn.sendMessage(
+from,
+{text: "Apenas links do Instagram"},
+{quoted: info}
+);
+
+}
+
+const res = await fetch(
+"https://v3.igdownloader.app/api/ajaxSearch",
+{
+method: "POST",
+headers: {
+"content-type":
+"application/x-www-form-urlencoded; charset=UTF-8"
+},
+body:
+`recaptchaToken=&q=${encodeURIComponent(url)}&t=media`
+}
+);
+
+const json = await res.json();
+
+if (!json.data || !json.data[0]) {
+
+return conn.sendMessage(
+from,
+{text: "Erro ao obter vídeo."},
+{quoted: info}
+);
+
+}
+
+const video = json.data[0].url;
+
+await conn.sendMessage(
+from,
+{
+text: "📥 Baixando vídeo do Instagram..."
+},
+{quoted: info}
+);
+
+await conn.sendMessage(
+from,
+{
+video: {url: video},
+mimetype: "video/mp4"
+},
+{quoted: info}
+);
+
+} catch (e) {
+
+console.log(e);
+
+return conn.sendMessage(
+from,
+{text: "Erro ao baixar Instagram."},
+{quoted: info}
+);
+
+}
+
+}
+
+
+// =====================================
+// METADINHAS
+// =====================================
+
+async function METADINHAS(
+conn,
+from,
+info
+) {
+
+try {
+
+const masculino =
+"https://i.imgur.com/8PT6G3D.jpeg";
+
+const feminino =
+"https://i.imgur.com/2YQZ6Yg.jpeg";
+
+await conn.sendMessage(
+from,
+{
+image: {url: masculino},
+caption: "🤵 | Perfil masculino"
+},
+{quoted: info}
+);
+
+await conn.sendMessage(
+from,
+{
+image: {url: feminino},
+caption: "👰 | Perfil feminino"
+},
+{quoted: info}
+);
+
+} catch (e) {
+
+console.log(e);
+
+return conn.sendMessage(
+from,
+{text: "Erro no comando"},
+{quoted: info}
+);
+
+}
+
+}
+
+
+// =====================================
+// EXPORTS
+// =====================================
+
+module.exports = {
+
+BuscarNogpt,
+BaixarNoYt,
+ttkdl,
+instadl,
+METADINHAS
+
+};
+```
