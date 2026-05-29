@@ -1,12 +1,22 @@
 const fetch = require('node-fetch');
 
-async function BuscarNogpt(query, SHIZUKU_SITE, SHIZUKU_KEY) {
-try {const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(query?.trim())}&apitoken=${SHIZUKU_KEY}`);
-const api = await res.json()
-if(!api?.resposta) return reply("Erro");
-return api.resposta.trim();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI("TUA_API_GEMINI");
+
+async function BuscarNogpt(query) {
+try {
+
+const model = genAI.getGenerativeModel({
+model: "gemini-1.5-flash"
+});
+
+const result = await model.generateContent(query);
+
+return result.response.text();
+
 } catch (e) {
-return "Erro em :" +e;
+return "Erro: " + e;
 }
 }
 
@@ -20,11 +30,16 @@ return "Erro ao buscar resultados";
 }
 };
 
-async function ttkdl(url, conn, from, info, quoted, ShizukuStile, SHIZUKU_SITE, SHIZUKU_KEY) {
-if(!url?.includes("tiktok")) return conn.sendMessage(from, {text: "Apenas links do tiktok"}, {quoted: info})
-try {const res = await fetch(`${SHIZUKU_SITE}/download/tiktokdl-2?url=${encodeURIComponent(url.trim())}&apitoken=${SHIZUKU_KEY}`)
-const api = await res.json();
+async function ttkdl(url) {
 
+const res = await fetch(
+`https://tikwm.com/api/?url=${encodeURIComponent(url)}`
+);
+
+const json = await res.json();
+
+return json.data.play;
+}
 if(!api?.resultado) return conn.sendMessage(from, {text: "Erro ao buscar por resultados"}, {quoted: info})
 const i = api?.resultado?.data[0];
 const txt = `*Titulo:* ${i?.title}
@@ -98,20 +113,23 @@ async function BuscarYoutube(query) {
   }
 }
 
-async function BaixarYtLocalmente(query, tipo) {
-  try {
-    const r = await ytSearch(query);
-    const video = r.videos[0];
-    if (!video) return null;
-    // Retorna URL do YouTube para o bot baixar com ytdl ou ffmpeg
-    return {
-      titulo: video.title,
-      url: video.url,
-      thumb: video.thumbnail,
-      duracao: video.timestamp
-    };
-  } catch (e) {
-    return null;
-  }
+const ytdlp = require('yt-dlp-exec');
+
+async function BaixarNoYt(url) {
+
+try {
+
+const info = await ytdlp(url, {
+dumpSingleJson: true
+});
+
+return {
+titulo: info.title,
+audio: info.url
+};
+
+} catch(e) {
+return "Erro ao baixar";
+}
 }
 module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS, BuscarYoutube, BaixarYtLocalmente }
