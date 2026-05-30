@@ -166,6 +166,13 @@ SoBot ||
 SoCriador ||
 IsCreator;
 
+// Bloquear privado — só o dono passa
+if (!isGroup && !So_Dono) return;
+
+// Bloquear grupos não autorizados — só o dono passa
+const gruposPermitidos = JSON.parse(fs.readFileSync('./dono/grupos-permitidos.json', 'utf-8') || '[]');
+if (isGroup && !gruposPermitidos.includes(from) && !So_Dono) return;
+	  
 const type = baileys.getContentType(info?.message);
 let body =
   info?.message?.conversation ||
