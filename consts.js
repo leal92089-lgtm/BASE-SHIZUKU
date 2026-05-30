@@ -53,7 +53,7 @@ HTTPS://WHATSAPP.COM/CHANNEL/0029VBBOQI7F1YLYIXIWBD37
 ----------------------------------------------------------------
 
 ENTRE NO GRUPO:
-HTTPS://CHAT.WHATSAPP.COM/D1WUKVCRWR FCU05MGGPWTY
+HTTPS://CHAT.WHATSAPP.COM/D1WUKVCRWRFCU05MGGPWTY
 
 ----------------------------------------------------------------
 =========================== AVISO FINAL =========================
@@ -92,7 +92,7 @@ const data = moment.tz('America/Sao_Paulo').format('DD/MM/YYYY');
 
 const { sendVideoAsSticker2, sendImageAsSticker2 } = require('./DATABASE2/sticker/rename.js');
 
-const { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS } = require("./DATABASE2/SCRAPERS/scrapers");
+const { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS, BuscarYoutube, BaixarYtLocalmente } = require("./DATABASE2/SCRAPERS/scrapers");
 //EXPORTAÇÃO 
 const { menu } = require("./dono/menus/menu")
 const { menus } = require("./dono/menus/Shizuku")
@@ -181,7 +181,7 @@ fs,
 SimilarComandos, 
 ListaComandos, 
 getGroupAdmins,
- getMembros, 
+getMembros, 
 moment,
 msg,
 axios,
@@ -207,17 +207,19 @@ BaixarNoYt,
 ttkdl,
 instadl,
 METADINHAS,
+BuscarYoutube,
+BaixarYtLocalmente,
 ANT_LTR_MD_EMJ,
 dono1, 
 dono2, 
 dono3, 
 dono4, 
 dono5,
- dono6,
- sendImageAsSticker2,
- sendVideoAsSticker2,
- getFileBuffer,
- downloadContentFromMessage,
- prepareWAMessageMedia,
- jidNormalizedUser 
+dono6,
+sendImageAsSticker2,
+sendVideoAsSticker2,
+getFileBuffer,
+downloadContentFromMessage,
+prepareWAMessageMedia,
+jidNormalizedUser 
 };
