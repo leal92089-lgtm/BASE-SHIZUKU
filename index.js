@@ -885,13 +885,12 @@ await conn.sendMessage(from, {image: FotoMenu, caption: menus?.menuDown(prefix, 
 } break;
 
 //COMAMDOS DE IA
-case 'chatgpt': case 'gpt':{
-if(!q.trim()) return reply("Falta a question!");
-await reagir(from, "👀");
-let resposta = await BuscarNogpt(q, SHIZUKU_SITE, SHIZUKU_KEY);
-await reply(resposta);
-}
-break;
+case 'chatgpt': case 'gpt': {
+  if (!q.trim()) return reply("Pergunta o quê? O ar?");
+  await reagir(from, "🤔");
+  const resposta = await RespostaIA(q, pushname);
+  await reply(resposta);
+} break;
 
 case 'play': {
 try {if (!q) return reply("Digite o nome da música.");
