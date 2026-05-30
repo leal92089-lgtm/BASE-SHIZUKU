@@ -1285,46 +1285,101 @@ conn?.sendMessage(from, {image: FotoMenu, caption: texto, contextInfo: ShizukuSt
 break;
 
 case 'revelar': {
-  if (!So_Dono) return reply("❌ Apenas o dono pode usar este comando.");
+if (!So_Dono) return reply("❌ Apenas o dono pode usar este comando.");
 
-  try {
-    await reagir(from, "👁️");
+try {
+await reagir(from, "👁️");
 
-    // Pegar a mensagem citada correctamente
-    const quotedMsg = info.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-    if (!quotedMsg) return reply("Responde a uma mensagem de visualização única.");
+const contextInfo =
+info.message?.extendedTextMessage?.contextInfo ||
+info.message?.imageMessage?.contextInfo ||
+info.message?.videoMessage?.contextInfo ||
+info.message?.documentMessage?.contextInfo;
 
-    // Verificar se é viewOnce
-    const viewOnce =
-      quotedMsg?.viewOnceMessage?.message ||
-      quotedMsg?.viewOnceMessageV2?.message ||
-      quotedMsg?.viewOnceMessageV2Extension?.message;
+const quotedMsg = contextInfo?.quotedMessage;
 
-    if (!viewOnce) return reply("Esta mensagem não é de visualização única.");
+if (!quotedMsg)
+return reply("❌ Responda a uma mensagem de visualização única.");
 
-    const tipo = viewOnce.imageMessage ? 'imageMessage'
-      : viewOnce.videoMessage ? 'videoMessage'
-      : viewOnce.audioMessage ? 'audioMessage'
-      : null;
+console.log(
+JSON.stringify(quotedMsg, null, 2)
+);
 
-    if (!tipo) return reply("Tipo de mensagem não suportado.");
+const viewOnce =
+quotedMsg?.viewOnceMessage?.message ||
+quotedMsg?.viewOnceMessageV2?.message ||
+quotedMsg?.viewOnceMessageV2Extension?.message;
 
-    const buffer = await getFileBuffer(viewOnce[tipo], tipo.replace('Message', ''));
+if (!viewOnce)
+return reply("❌ A mensagem citada não é View Once.");
 
-    if (tipo === 'imageMessage') {
-      await conn.sendMessage(from, { image: buffer, caption: "👁️ Imagem revelada" }, { quoted: info });
-    } else if (tipo === 'videoMessage') {
-      await conn.sendMessage(from, { video: buffer, mimetype: "video/mp4", caption: "👁️ Vídeo revelado" }, { quoted: info });
-    } else if (tipo === 'audioMessage') {
-      await conn.sendMessage(from, { audio: buffer, mimetype: "audio/mpeg", ptt: false }, { quoted: info });
-    }
+const mediaMsg =
+viewOnce?.imageMessage ||
+viewOnce?.videoMessage ||
+viewOnce?.audioMessage;
 
-    await reagir(from, "✅");
-  } catch (e) {
-    reply("Erro ao revelar: " + e);
-    console.log("Erro revelar:", e);
-  }
-} break;
+if (!mediaMsg)
+return reply("❌ Tipo de mídia não suportado.");
+
+const mediaType =
+viewOnce?.imageMessage ? "image" :
+viewOnce?.videoMessage ? "video" :
+"audio";
+
+let buffer = Buffer.from([]);
+
+const stream = await downloadContentFromMessage(
+mediaMsg,
+mediaType
+);
+
+for await (const chunk of stream) {
+buffer = Buffer.concat([buffer, chunk]);
+}
+
+if (mediaType === "image") {
+await conn.sendMessage(
+from,
+{
+image: buffer,
+caption: "👁️ Imagem revelada"
+},
+{ quoted: info }
+);
+}
+
+if (mediaType === "video") {
+await conn.sendMessage(
+from,
+{
+video: buffer,
+caption: "👁️ Vídeo revelado",
+mimetype: "video/mp4"
+},
+{ quoted: info }
+);
+}
+
+if (mediaType === "audio") {
+await conn.sendMessage(
+from,
+{
+audio: buffer,
+mimetype: "audio/mpeg",
+ptt: false
+},
+{ quoted: info }
+);
+}
+
+await reagir(from, "✅");
+
+} catch (e) {
+console.log("ERRO REVELAR:", e);
+reply(`❌ Erro: ${e.message}`);
+}
+}
+break;
 
 case 'verificado':
 if(!So_Dono) return reply(msg.SoDono)
