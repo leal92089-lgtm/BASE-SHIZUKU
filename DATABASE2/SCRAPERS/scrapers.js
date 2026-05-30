@@ -27,14 +27,26 @@ async function RespostaIA(pergunta, pushname) {
   }
 }
 
-async function BuscarNogpt(query, SHIZUKU_SITE, SHIZUKU_KEY) {
-try {const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(query?.trim())}&apitoken=${SHIZUKU_KEY}`);
-const api = await res.json()
-if(!api?.resposta) return reply("Erro");
-return api.resposta.trim();
-} catch (e) {
-return "Erro em :" +e;
-}
+async function RespostaIA(pergunta, pushname) {
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: `És um bot de WhatsApp chamado Shizuku. Respondes sempre em português de Angola. Tens personalidade sarcástica, inteligente e bem-humorada. O utilizador chama-se ${pushname}.` }]
+          },
+          contents: [{ parts: [{ text: pergunta }] }]
+        })
+      }
+    );
+    const data = await res.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Nem eu sei responder a isso...';
+  } catch (e) {
+    return 'Erro ao pensar... o que já diz muito sobre a pergunta.';
+  }
 }
 
 async function BaixarNoYt(query, tipo) {
