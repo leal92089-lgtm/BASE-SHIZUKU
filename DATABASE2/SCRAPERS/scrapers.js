@@ -4,6 +4,29 @@ const ytdl = require('@distube/ytdl-core');
 const fs = require('fs');
 const path = require('path');
 
+async function RespostaIA(pergunta, pushname) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_KEY || '',
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: `És um bot de WhatsApp chamado Shizuku. Respondes sempre em português de Angola. Tens uma personalidade sarcástica, inteligente e bem-humorada. Nunca és grosseiro mas sempre tens uma resposta afiada. O utilizador chama-se ${pushname}.`,
+        messages: [{ role: 'user', content: pergunta }]
+      })
+    });
+    const data = await res.json();
+    return data?.content?.[0]?.text || 'Nem eu sei responder a isso...';
+  } catch (e) {
+    return 'Erro ao pensar... o que já diz muito sobre a pergunta.';
+  }
+}
+
 async function BuscarNogpt(query, SHIZUKU_SITE, SHIZUKU_KEY) {
 try {const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(query?.trim())}&apitoken=${SHIZUKU_KEY}`);
 const api = await res.json()
@@ -128,4 +151,4 @@ async function BaixarYtLocalmente(query, tipo) {
   }
 }
 
-module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS, BuscarYoutube, BaixarYtLocalmente }
+module.exports = { BuscarNogpt, RespostaIA, BaixarNoYt, ttkdl, instadl, METADINHAS, BuscarYoutube, BaixarYtLocalmente }
