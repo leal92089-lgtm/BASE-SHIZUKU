@@ -997,9 +997,9 @@ const TXT = `°✫🎵 *Título:* ${TITULO}
 await conn.sendMessage(from, {image: {url: IMAGE}, caption: TXT}, {quoted: info});
 await conn.sendMessage(from, {audio: {url: AUDIO}, mimetype: TIPO, fileName: NOMEMUSICA, ptt: false, contextInfo: ShizukuStile}, {quoted: info});
 } else if(command === 'play_audio') {
-const Audio = await BaixarNoYt(q, tipo = "ytmp3");
-
-await conn.sendMessage(from, {audio: {url: Audio}, mimetype: "audio/mpeg", contextInfo: ShizukuStile, ptt: false}, {quoted: info})
+const resultAudio = await BaixarYtLocalmente(q, 'mp3');
+if (!resultAudio) return reply("❌ Não consegui baixar o áudio.");
+await conn.sendMessage(from, {audio: {url: resultAudio.arquivo}, mimetype: "audio/mpeg", contextInfo: ShizukuStile, ptt: false}, {quoted: info})
 }
 await reagir(from, "✅");
 
@@ -1014,8 +1014,9 @@ case 'play_video':
 if(!q.trim()) return reply("coloca o nome da música kpt");
 await reply(msg.Download);
 try {
-const Video = await BaixarNoYt(q, tipo = 'ytmp4');
-await conn.sendMessage(from, {video: {url: Video}, mimetype: "video/mp4", contextInfo: ShizukuStile, ptt: false}, {quoted: info})
+const resultVideo = await BaixarYtLocalmente(q, 'mp4');
+if (!resultVideo) return reply("❌ Não consegui baixar o vídeo.");
+await conn.sendMessage(from, {video: {url: resultVideo.arquivo}, mimetype: "video/mp4", contextInfo: ShizukuStile, ptt: false}, {quoted: info})
 } catch (e) {
 reply(`${e}`)
 } break;
