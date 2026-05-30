@@ -579,19 +579,20 @@ mentions: [menc_os2]
 break;
 
 case 'revelar': {
-  // Verifica se tem mensagem citada
-  if (!info.quoted) return reply("Responde a uma mensagem de visualização única.");
-
-  // Bloqueia se não for o dono
   if (!So_Dono) return reply("❌ Apenas o dono pode usar este comando.");
 
   try {
     await reagir(from, "👁️");
 
+    // Pegar a mensagem citada correctamente
+    const quotedMsg = info.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    if (!quotedMsg) return reply("Responde a uma mensagem de visualização única.");
+
+    // Verificar se é viewOnce
     const viewOnce =
-      info.quoted.message?.viewOnceMessage?.message ||
-      info.quoted.message?.viewOnceMessageV2?.message ||
-      info.quoted.message?.viewOnceMessageV2Extension?.message;
+      quotedMsg?.viewOnceMessage?.message ||
+      quotedMsg?.viewOnceMessageV2?.message ||
+      quotedMsg?.viewOnceMessageV2Extension?.message;
 
     if (!viewOnce) return reply("Esta mensagem não é de visualização única.");
 
@@ -615,6 +616,7 @@ case 'revelar': {
     await reagir(from, "✅");
   } catch (e) {
     reply("Erro ao revelar: " + e);
+    console.log("Erro revelar:", e);
   }
 } break;
 
