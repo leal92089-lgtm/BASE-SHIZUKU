@@ -1,4 +1,8 @@
 const fetch = require('node-fetch');
+const ytSearch = require('yt-search');
+const ytdl = require('@distube/ytdl-core');
+const fs = require('fs');
+const path = require('path');
 
 async function BuscarNogpt(query, SHIZUKU_SITE, SHIZUKU_KEY) {
 try {const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(query?.trim())}&apitoken=${SHIZUKU_KEY}`);
@@ -27,10 +31,7 @@ const api = await res.json();
 
 if(!api?.resultado) return conn.sendMessage(from, {text: "Erro ao buscar por resultados"}, {quoted: info})
 const i = api?.resultado?.data[0];
-const txt = `*Titulo:* ${i?.title}
-*Sub Titulo:* ${i?.title_audio}
-
-*DOWNLOAD VIA SHIZUKU API'S*`;
+const txt = `*Titulo:* ${i?.title}\n*Sub Titulo:* ${i?.title_audio}\n\n*DOWNLOAD VIA SHIZUKU API'S*`;
 setTimeout(() => {
 return conn.sendMessage(from, {image: {url: i?.thumb}, caption: txt}, {quoted: info})
 }, 2000);
@@ -63,7 +64,7 @@ return;
 }
 }
 
-async function METADINHAS(conn, from, info,quoted, SHIZUKU_KEY, SHIZUKU_SITE) {
+async function METADINHAS(conn, from, info, quoted, SHIZUKU_KEY, SHIZUKU_SITE) {
 try {const res = await fetch(`${SHIZUKU_SITE}/api/metadinha?&apitoken=${SHIZUKU_KEY}`);
 const json = await res.json();
 const api = json?.resultado;
@@ -79,4 +80,52 @@ conn.sendMessage(from, {image: {url: mulher}, caption: "👰 | Perfil feminino"}
 return conn.sendMessage(from, {text: "Erro no comando"}, {quoted: info});
 }
 }
-module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS }
+
+async function BuscarYoutube(query) {
+  try {
+    const r = await ytSearch(query);
+    const videos = r.videos.slice(0, 5);
+    if (!videos.length) return null;
+    return videos.map(v => ({
+      titulo: v.title,
+      duracao: v.timestamp,
+      visualizacoes: v.views,
+      url: v.url,
+      thumb: v.thumbnail
+    }));
+  } catch (e) {
+    return null;
+  }
+}
+
+async function BaixarYtLocalmente(query, tipo) {
+  try {
+    const r = await ytSearch(query);
+    const video = r.videos[0];
+    if (!video) return null;
+
+    const info = await ytdl.getInfo(video.url);
+    const titulo = info.videoDetails.title;
+    const thumb = info.videoDetails.thumbnails[0].url;
+
+    const tmpDir = './tmp';
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+
+    const nomeArquivo = path.join(tmpDir, `yt_${Date.now()}.${tipo === 'mp3' ? 'mp3' : 'mp4'}`);
+
+    await new Promise((resolve, reject) => {
+      const formato = tipo === 'mp3'
+        ? ytdl(video.url, { filter: 'audioonly', quality: 'highestaudio' })
+        : ytdl(video.url, { filter: 'videoandaudio', quality: 'highest' });
+      formato.pipe(fs.createWriteStream(nomeArquivo))
+        .on('finish', resolve)
+        .on('error', reject);
+    });
+
+    return { titulo, thumb, arquivo: nomeArquivo, tipo };
+  } catch (e) {
+    return null;
+  }
+}
+
+module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS, BuscarYoutube, BaixarYtLocalmente }
