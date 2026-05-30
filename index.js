@@ -537,6 +537,26 @@ if (!isCmd) return;// ISSO AQUI VAI PARA SE VIER SÓ MENSAGEM SEM PREFIXO, OK?
 
 switch (command) {
 
+case 'permitirgrupo': {
+  if (!So_Dono) return reply("❌ Apenas o dono pode usar este comando.");
+  if (!isGroup) return reply("❌ Use este comando dentro de um grupo.");
+  const lista = JSON.parse(fs.readFileSync('./dono/grupos-permitidos.json', 'utf-8') || '[]');
+  if (lista.includes(from)) return reply("✅ Este grupo já está na lista.");
+  lista.push(from);
+  fs.writeFileSync('./dono/grupos-permitidos.json', JSON.stringify(lista, null, 2));
+  return reply("✅ Grupo adicionado com sucesso!");
+} break;
+
+case 'removergrupo': {
+  if (!So_Dono) return reply("❌ Apenas o dono pode usar este comando.");
+  if (!isGroup) return reply("❌ Use este comando dentro de um grupo.");
+  let lista = JSON.parse(fs.readFileSync('./dono/grupos-permitidos.json', 'utf-8') || '[]');
+  if (!lista.includes(from)) return reply("❌ Este grupo não está na lista.");
+  lista = lista.filter(g => g !== from);
+  fs.writeFileSync('./dono/grupos-permitidos.json', JSON.stringify(lista, null, 2));
+  return reply("✅ Grupo removido com sucesso!");
+} break;		
+
 //COMANDOS DE ADMIN'S!!
 case 'rebaixar':  case 'promover':
 if (!isGroupAdmins) return reply(msg.SoAdmin);
