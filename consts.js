@@ -171,6 +171,7 @@ return buffer;
 
 module.exports = { 
 fetchJson, 
+RespostaIA, 
 colors, hora, 
 data, 
 banner2, 
