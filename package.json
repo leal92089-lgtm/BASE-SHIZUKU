@@ -14,6 +14,7 @@
   "author": "jpzinh",
   "license": "MIT",
   "dependencies": {
+    "@distube/ytdl-core": "^4.16.4",
     "@hapi/boom": "^10.0.1",
     "@whiskeysockets/baileys": "^v6.7.21",
     "awesome-phonenumber": "^7.6.0",
